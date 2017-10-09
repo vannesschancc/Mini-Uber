@@ -79,6 +79,7 @@ public class DriverLocationActivity extends FragmentActivity implements OnMapRea
         mapFragment.getMapAsync(this);
 
         RelativeLayout mapLayout = (RelativeLayout)findViewById(R.id.mapRelativeLayout);
+        //Obtain from Stackoverflow
         mapLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
