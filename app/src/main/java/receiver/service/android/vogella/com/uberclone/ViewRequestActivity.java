@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
@@ -42,6 +43,8 @@ public class ViewRequestActivity extends AppCompatActivity {
     ArrayList<Double> requestLatitudes = new ArrayList<>();
     ArrayList<Double> requestLongitudes = new ArrayList<>();
 
+    ArrayList<String> usernames = new ArrayList<String>();
+
     LocationListener locationListener;
     LocationManager locationManager;
     String ViewRequestTag = "In View Request ";
@@ -54,6 +57,7 @@ public class ViewRequestActivity extends AppCompatActivity {
             final ParseGeoPoint geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
 
             query.whereNear("location", geoPointLocation);
+            //query.whereDoesNotExist("driverUsername");
 
             query.setLimit(10);
 
@@ -75,6 +79,7 @@ public class ViewRequestActivity extends AppCompatActivity {
                                     requests.add(distanceOneDp.toString() + "miles");
                                     requestLatitudes.add(requestLocation.getLatitude());
                                     requestLongitudes.add(requestLocation.getLongitude());
+                                    usernames.add(object.getString("username"));
                                 }
                             }
                         } else {
@@ -113,19 +118,27 @@ public class ViewRequestActivity extends AppCompatActivity {
         arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, requests);
 
         requests.clear();
+
         requests.add("Getting Nearby Request");
+
         requestListView.setAdapter(arrayAdapter);
+
         requestListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (Build.VERSION.SDK_INT < 23 || ContextCompat.checkSelfPermission(ViewRequestActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+                if (Build.VERSION.SDK_INT < 23 || ContextCompat.checkSelfPermission(ViewRequestActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+
                     Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    if (requestLatitudes.size() > i && requestLongitudes.size() > i && lastKnownLocation != null) {
+
+                    Log.e(ViewRequestTag, "the bottom is pressed");
+                    if (requestLatitudes.size() > i && requestLongitudes.size() > i && lastKnownLocation != null && usernames.size() > i) {
+
                         Intent intent = new Intent(getApplicationContext(), DriverLocationActivity.class);
                         intent.putExtra("requestLatitude", requestLatitudes.get(i));
                         intent.putExtra("requestLongitude", requestLongitudes.get(i));
                         intent.putExtra("driverLatitude", lastKnownLocation.getLatitude());
                         intent.putExtra("driverLongitude", lastKnownLocation.getLongitude());
+                        intent.putExtra("username",usernames.get(i));
                         startActivity(intent);
                     }
                 }
